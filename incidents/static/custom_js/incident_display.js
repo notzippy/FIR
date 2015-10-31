@@ -1,3 +1,5 @@
+var refresh_displays =  false;
+var auto_timer_id = false
 $(function () {
 	function refresh_incident_display(container) {
 		return function(data) {
@@ -9,8 +11,40 @@ $(function () {
     		});
 		};
 	}
+	refresh_displays = function() {
+        /*
+        $(".incident_table table > thead > tr > th:first-child a").each(function(){
+            refresh_display($(this), false)
+        })
+        */
+        $(".incident_table").each(function(){
+            incident_table = $(this)
+            order_by = incident_table.data('order-param') || 'date';
+            asc = incident_table.data('asc') || false;
+            if (incident_table.hasClass('incident_display')) {
+                container = incident_table;
+            }
+            else {
+                container = incident_table.closest('.incident_display');
+            }
+            url = container.data('url');
+            $.get(url, { 'order_by': order_by, 'asc': asc, 'q': q, 'page': page }, refresh_incident_display(container));
 
-	function refresh_display(element) {
+        })
+    }
+    autoRefreshCheck = function(){
+        if ($(this).prop("checked")) {
+            auto_timer_id = setInterval(refresh_displays,5000);
+        } else if (auto_timer_id!==false){
+            clearInterval(auto_timer_id);
+            auto_timer_id = false;
+        }
+    }
+    $("input.autorefresh").click(autoRefreshCheck)
+    $("input.autorefresh").each(autoRefreshCheck)
+    
+	function refresh_display(element, alternate) {
+        alternate = typeof alternate !== 'undefined' ? alternate : true;
 		incident_table = element.closest('.incident_table');
 		if (element.hasClass('incident_display')) {
 			container = element;
@@ -31,13 +65,16 @@ $(function () {
 				order_by = field;
 			}
 		}
+		
+		if (!alternate) {
+			asc = !asc;            
+		}
 
 		url = container.data('url');
 		q = container.data('query');
 
 		page = element.data('page') || 1;
-
-		$.get(url, { 'order_by': order_by, 'asc': asc, 'q': q, 'page': page }, refresh_incident_display(container));
+        $.get(url, { 'order_by': order_by, 'asc': asc, 'q': q, 'page': page }, refresh_incident_display(container));
 	}
 
 	function toggle_star(link) {

@@ -298,6 +298,58 @@ def edit_incident(request, incident_id):
 
 	return render(request, 'events/new.html', {'i': i, 'form': form, 'mode': 'edit', 'bls': bls})
 
+@login_required
+@user_passes_test(is_incident_handler)
+def claim_incident(request, incident_id):
+	i = get_object_or_404(Incident, pk=incident_id)
+	starred = i.is_starred
+	bls = BusinessLine.objects.all()
+	if i.assigned_to == None:
+		i.assigned_to = request.user
+		i.save()
+		c = Comments()
+		c.comment = "Claimed by SOC"
+		c.action = Label.objects.get(name='Info')
+		c.incident = i
+		c.opened_by = request.user
+		c.save()
+	else: 
+		return redirect('dashboard:main')
+	
+
+	if request.method == "POST":
+		form = IncidentForm(request.POST, instance=i)
+
+		if form.is_valid():
+			extra_comments = diff(Incident.objects.get(pk=incident_id), form.cleaned_data)
+			if extra_comments != "":
+				c = Comments()
+				c.comment = extra_comments
+				c.action = Label.objects.get(name='Info')
+				c.incident = i
+				c.opened_by = request.user
+				c.save()
+
+				log("Edit incident", request.user, incident=i)
+
+			# update main BL
+			form.save()
+			i.refresh_main_business_lines()
+			i.is_starred = starred
+			i.refresh_artifacts(i.description)
+			i.save()
+
+			if i.is_incident:
+				return redirect("incidents:details", incident_id=i.id)
+				return redirect("incidents:index")
+			else:
+				return redirect("events:details", incident_id=i.id)
+				return redirect("events:index")
+	else:
+		form = IncidentForm(instance=i)
+
+	return render(request, 'events/new.html', {'i': i, 'form': form, 'mode': 'edit', 'bls': bls})
+
 
 @login_required
 @user_passes_test(is_incident_handler)

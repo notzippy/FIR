@@ -32,7 +32,6 @@ $(document).ready(function() {
 
 
 {% block content %}
-
 	<div class="container-fluid labels-ontop">
 		{% if not i %}
 			<form action="{% url 'events:new' %}" method="post">
@@ -102,7 +101,17 @@ $(document).ready(function() {
 								{{ form.date|add_css_class:"form-control datetime" }}
 								{% include 'events/_form_errors.html' with errors=form.date.errors %}
 							</div>
-							<div class="col-sm-6 checkbox aligned-with-stack{% if form.is_incident.errors%} has-error{%endif%}">
+							<div class="col-sm-2 form-group{% if form.detection.errors%} has-error{%endif%}">
+								<label id="id_assigned_to">{% trans "Assigned To" %}</label>
+								{{ form.assigned_to|add_css_class:"form-control" }}
+								{% include 'events/_form_errors.html' with errors=form.detection.errors %}
+							</div>
+							<div class="col-sm-2 form-group{% if form.severity.errors%} has-error{%endif%}">
+								<label id="id_opened_by">{% trans "Owned By" %}</label>
+								{{ form.opened_by|add_css_class:"form-control" }}
+								{% include 'events/_form_errors.html' with errors=form.severity.errors %}
+							</div>
+							<div class="col-sm-2 checkbox aligned-with-stack{% if form.is_incident.errors%} has-error{%endif%}">
 								<label data-toggle='collapse' data-target='#incident_fields'>{{ form.is_incident }} {% trans "Is an incident" %}</label>
 								{% include 'events/_form_errors.html' with errors=form.is_incident.errors %}
 							</div>

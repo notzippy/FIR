@@ -1,5 +1,4 @@
 {% load i18n %}
-{% if incident_list %}
 	<div class='incident_table' data-order-param='{{ order_param }}' data-asc='{{ asc }}'>
 		<table class='table table-hover table-condensed'>
 			<thead>
@@ -14,6 +13,7 @@
             {% trans "Plan" as t_plan %}
             {% trans "Lvl" as t_lvl %}
             {% trans "IH" as t_ih %}
+            {% trans "IA" as t_ah %}
             {% trans "None" as t_none %}
 				<tr>
                     {% if incident_show_id %}<th>ID</th>{% endif %}
@@ -32,6 +32,7 @@
 						{% include 'events/column.html' with name=t_lvl field='confidentiality' %}
 					{% endif %}
 					{% include 'events/column.html' with name=t_ih field='opened_by' %}
+					{% include 'events/column.html' with name=t_ah field='assigned_to' %}
 					<th>{%  trans "Edit" %}</th>
 				</tr>
 			</thead>
@@ -77,6 +78,10 @@
 						{% endif %}
 
 						<td>{{ incident.opened_by }}</td>
+						<td>{% if incident.assigned_to %} {{ incident.assigned_to }}
+						{% else %} 
+							<a href="{% url 'incidents:claim' incident.id %}">Claim</a>
+						{%endif%}</td>
 						<td>
 							<a href="{% url 'incidents:edit' incident.id %}"><span class='glyphicon glyphicon-pencil'></span></a>
 						</td>
@@ -84,6 +89,10 @@
 				{% endfor %}
 			</tbody>
 		</table>
+{% if incident_list %}
+{% else %}
+	<div class='nothing_to_show'>{% trans "No incidents to show." %}</div>
+{% endif %}
 
 		{% if incident_list.paginator %}
 			<div>
@@ -107,6 +116,6 @@
 			</div>
 		{% endif %}
 	</div>
-{% else %}
-	<div class='nothing_to_show'>{% trans "No incidents to show." %}</div>
-{% endif %}
+<script>
+reloadPageOnTimeout = true;
+</script>

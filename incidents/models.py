@@ -196,6 +196,7 @@ class Incident(models.Model):
 	plan = models.ForeignKey(Label, limit_choices_to={'group__name': 'plan'}, related_name='plan_label', blank=True, null=True)
 	status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=_("Open"))
 	opened_by = models.ForeignKey(User)
+	assigned_to = models.ForeignKey(User, related_name='assigned_id',null=True, blank=True)
 	confidentiality = models.IntegerField(choices=CONFIDENTIALITY_LEVEL, default='1')
 
 	def __unicode__(self):
@@ -353,7 +354,7 @@ class IncidentForm(ModelForm):
 
 	class Meta:
 		model = Incident
-		exclude = ('opened_by', 'main_business_lines', 'is_starred')
+		exclude = ( 'main_business_lines', 'is_starred')
 
 
 class CommentForm(ModelForm):
